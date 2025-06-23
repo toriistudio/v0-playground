@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "@toriistudio/v0-playground": {
+      "signature": "2f26736e252a538076244308781c41b9",
+      "file": true,
+      "replaced": "latest"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "packages": {
+    "@toriistudio/glow-ui": {
+      "signature": "2f26736e252a538076244308781c41b9",
+      "file": true
+    },
+    "@toriistudio/v0-playground": {
+      "signature": "b1ce38609e8a5d593d12d2a040f4c24e",
+      "file": true
+    }
+  }
+}

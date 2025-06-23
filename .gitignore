@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+.yalc
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log* # Added pnpm log
+
+# Lockfile
+# pnpm-lock.yaml # Usually you commit the lockfile, but ignore if needed
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.tgz
+
+# OS generated files
+.DS_Store
+Thumbs.db

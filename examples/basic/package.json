@@ -1,0 +1,27 @@
+{
+  "name": "v0-playground-example-basic",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "yalc add @toriistudio/v0-playground && yarn && vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "reset": "rm -rf .yalc node_modules yarn.lock && yalc add @toriistudio/v0-playground && yarn"
+  },
+  "dependencies": {
+    "@toriistudio/glow-ui": "latest",
+    "@toriistudio/v0-playground": "file:.yalc/@toriistudio/v0-playground",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.522.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.5.2",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  }
+}
