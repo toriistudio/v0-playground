@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, SquareArrowOutUpRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { useResizableLayout } from "@/context/ResizableLayout";
 import { useControlsContext } from "@/context/ControlsContext";
+
+import { Button } from "@/components/ui/button";
 
 const ControlPanel: React.FC = () => {
   const [copied, setCopied] = useState(false);
@@ -30,6 +32,19 @@ const ControlPanel: React.FC = () => {
   const buttonControls = Object.entries(schema).filter(
     ([, control]) => control.type === "button"
   );
+
+  const previewUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("nocontrols", "true");
+
+    for (const [key, value] of Object.entries(values)) {
+      if (value !== undefined && value !== null) {
+        params.set(key, value.toString());
+      }
+    }
+
+    return `${window.location.pathname}?${params.toString()}`;
+  }, [values]);
 
   const jsx = useMemo(() => {
     if (!componentName) return "";
@@ -225,6 +240,16 @@ const ControlPanel: React.FC = () => {
             </div>
           )}
         </div>
+        <Button asChild>
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full px-4 py-2 text-sm text-center bg-stone-800 hover:bg-stone-700 text-white rounded"
+          >
+            <SquareArrowOutUpRight /> Open in a New Tab
+          </a>
+        </Button>
       </div>
     </div>
   );
