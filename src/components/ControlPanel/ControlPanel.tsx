@@ -34,6 +34,8 @@ const ControlPanel: React.FC = () => {
   );
 
   const previewUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+
     const params = new URLSearchParams();
     params.set("nocontrols", "true");
 
