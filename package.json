@@ -1,6 +1,6 @@
 {
   "name": "@toriistudio/v0-playground",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "V0 Playground",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
