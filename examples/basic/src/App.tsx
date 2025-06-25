@@ -1,10 +1,10 @@
 import { Download, SquareArrowOutUpRight } from "lucide-react";
 
 import { Button } from "@toriistudio/glow-ui";
-import { Playground, useControls } from "@toriistudio/v0-playground";
+import { Playground, useUrlSyncedControls } from "@toriistudio/v0-playground";
 
 function BasicComponent() {
-  const { text, variant, glowColor, isGlowing } = useControls(
+  const { text, variant, glowColor, isGlowing } = useUrlSyncedControls(
     {
       text: { type: "string", value: "Hello World" },
       variant: {

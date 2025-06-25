@@ -32,7 +32,13 @@ export const useResizableLayout = () => {
 };
 
 // Layout wrapper with resize logic
-export const ResizableLayout = ({ children }: { children: ReactNode }) => {
+export const ResizableLayout = ({
+  children,
+  hideControls,
+}: {
+  children: ReactNode;
+  hideControls: boolean;
+}) => {
   const [leftPanelWidth, setLeftPanelWidth] = useState(25); // %
   const [isDesktop, setIsDesktop] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -109,7 +115,7 @@ export const ResizableLayout = ({ children }: { children: ReactNode }) => {
         >
           {children}
 
-          {isHydrated && isDesktop && (
+          {isHydrated && isDesktop && !hideControls && (
             <div
               className="order-3 w-2 bg-stone-800 hover:bg-stone-700 cursor-col-resize items-center justify-center z-10 transition-opacity duration-300"
               onMouseDown={() => setIsDragging(true)}

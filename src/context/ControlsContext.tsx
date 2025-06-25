@@ -10,6 +10,8 @@ import React, {
   useCallback,
 } from "react";
 
+import { getUrlParams, parseValue } from "@/utils/getUrlParams";
+
 export type ControlType =
   | { type: "boolean"; value: boolean }
   | { type: "number"; value: number; min?: number; max?: number; step?: number }
@@ -132,4 +134,38 @@ export const useControls = <T extends ControlsSchema>(
     setValue: ctx.setValue,
     jsx,
   };
+};
+
+export const useUrlSyncedControls = <T extends ControlsSchema>(
+  schema: T,
+  options?: { componentName?: string }
+) => {
+  const urlParams = getUrlParams();
+
+  const mergedSchema = Object.fromEntries(
+    Object.entries(schema).map(([key, control]) => {
+      const urlValue = urlParams[key];
+      if (!urlValue || !("value" in control)) return [key, control];
+
+      const defaultValue = control.value;
+
+      let parsed: any = urlValue;
+      if (typeof defaultValue === "number") {
+        parsed = parseFloat(urlValue);
+        if (isNaN(parsed)) parsed = defaultValue;
+      } else if (typeof defaultValue === "boolean") {
+        parsed = urlValue === "true";
+      }
+
+      return [
+        key,
+        {
+          ...control,
+          value: parsed,
+        },
+      ];
+    })
+  ) as T;
+
+  return useControls(mergedSchema, options);
 };

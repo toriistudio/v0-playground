@@ -17,6 +17,22 @@ Perfect for prototyping components, sharing usage examples, or building your own
 
 ---
 
+## 📦 Peer Dependencies
+
+To use `@toriistudio/v0-playground`, you’ll need to install the following peer dependencies:
+
+```bash
+yarn add @radix-ui/react-label @radix-ui/react-select @radix-ui/react-slider @radix-ui/react-slot @radix-ui/react-switch class-variance-authority clsx lucide-react tailwind-merge tailwindcss-animate
+```
+
+Or automate it with:
+
+```json
+"scripts": {
+  "install:peers": "npm install $(node -p \"Object.keys(require('./package.json').peerDependencies).join(' ')\")"
+}
+```
+
 ## 🚀 Installation
 
 Install the package and its peer dependencies:
@@ -74,6 +90,26 @@ export default function App() {
 - Prototype interfaces quickly with real data
 - Debug and test variants visually
 
-## 🤙 License
+## 📄 License
 
 MIT
+
+## 🤝 Contributing
+
+We welcome contributions!
+
+If you'd like to improve the playground, add new features, or fix bugs:
+
+1. **Fork** this repository
+2. **Clone** your fork: `git clone https://github.com/your-username/v0-playground`
+3. **Install** dependencies: `yarn` or `npm install`
+4. Make your changes in a branch: `git checkout -b my-new-feature`
+5. **Push** your branch and open a pull request
+
+Before submitting a PR:
+
+- Run `yarn build` to ensure everything compiles
+- Make sure the playground runs without errors (`yalc push` or `npm link` for local testing)
+- Keep the code style clean and consistent
+
+We’re excited to see what you’ll build 🛠️✨

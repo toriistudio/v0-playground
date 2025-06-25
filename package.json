@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev:push": "yarn build && yalc push",
+    "local:push": "yarn build && yalc push",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
