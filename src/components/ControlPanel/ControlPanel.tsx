@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { Check, Copy, SquareArrowOutUpRight } from "lucide-react";
+
+import { usePreviewUrl } from "@/hooks/usePreviewUrl";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -26,27 +28,14 @@ const ControlPanel: React.FC = () => {
 
   const { schema, setValue, values, componentName } = useControlsContext();
 
+  const previewUrl = usePreviewUrl(values);
+
   const normalControls = Object.entries(schema).filter(
     ([, control]) => control.type !== "button"
   );
   const buttonControls = Object.entries(schema).filter(
     ([, control]) => control.type === "button"
   );
-
-  const previewUrl = useMemo(() => {
-    if (typeof window === "undefined") return "";
-
-    const params = new URLSearchParams();
-    params.set("nocontrols", "true");
-
-    for (const [key, value] of Object.entries(values)) {
-      if (value !== undefined && value !== null) {
-        params.set(key, value.toString());
-      }
-    }
-
-    return `${window.location.pathname}?${params.toString()}`;
-  }, [values]);
 
   const jsx = useMemo(() => {
     if (!componentName) return "";
@@ -242,16 +231,18 @@ const ControlPanel: React.FC = () => {
             </div>
           )}
         </div>
-        <Button asChild>
-          <a
-            href={previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full px-4 py-2 text-sm text-center bg-stone-800 hover:bg-stone-700 text-white rounded"
-          >
-            <SquareArrowOutUpRight /> Open in a New Tab
-          </a>
-        </Button>
+        {previewUrl && (
+          <Button asChild>
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full px-4 py-2 text-sm text-center bg-stone-800 hover:bg-stone-700 text-white rounded"
+            >
+              <SquareArrowOutUpRight /> Open in a New Tab
+            </a>
+          </Button>
+        )}
       </div>
     </div>
   );
