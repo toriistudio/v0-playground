@@ -23,6 +23,7 @@ pnpm-debug.log* # Added pnpm log
 *.sln
 *.sw?
 *.tgz
+.env
 
 # OS generated files
 .DS_Store
