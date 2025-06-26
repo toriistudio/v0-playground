@@ -30,7 +30,9 @@
   "scripts": {
     "build": "tsup",
     "local:push": "yarn build && yalc push",
-    "prepublishOnly": "npm run build",
+    "release:patch": "npm version patch && git push --follow-tags && npm publish",
+    "release:minor": "npm version minor && git push --follow-tags && npm publish",
+    "release:major": "npm version major && git push --follow-tags && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
