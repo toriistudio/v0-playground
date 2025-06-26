@@ -26,15 +26,16 @@ const ControlPanel: React.FC = () => {
   const { leftPanelWidth, isDesktop, isHydrated, sidebarNarrow } =
     useResizableLayout();
 
-  const { schema, setValue, values, componentName } = useControlsContext();
+  const { schema, setValue, values, componentName, config } =
+    useControlsContext();
 
   const previewUrl = usePreviewUrl(values);
 
   const normalControls = Object.entries(schema).filter(
-    ([, control]) => control.type !== "button"
+    ([, control]) => control.type !== "button" && !control.hidden
   );
   const buttonControls = Object.entries(schema).filter(
-    ([, control]) => control.type === "button"
+    ([, control]) => control.type === "button" && !control.hidden
   );
 
   const jsx = useMemo(() => {
@@ -74,7 +75,9 @@ const ControlPanel: React.FC = () => {
     >
       <div className="mb-10 space-y-4 p-2 md:p-4 border border-stone-700 rounded-md">
         <div className="space-y-1">
-          <h1 className="text-lg text-stone-100 font-bold">Controls</h1>
+          <h1 className="text-lg text-stone-100 font-bold">
+            {config?.mainLabel ?? "Controls"}
+          </h1>
         </div>
 
         <div className="space-y-4 pt-2">
@@ -182,8 +185,12 @@ const ControlPanel: React.FC = () => {
             }
           })}
           {(buttonControls.length > 0 || jsx) && (
-            <div className="border-t border-stone-700">
-              {jsx && (
+            <div
+              className={`${
+                normalControls.length > 0 ? "border-t" : ""
+              } border-stone-700`}
+            >
+              {jsx && config?.showCopyButton !== false && (
                 <div key="control-panel-jsx" className="flex-1 pt-4">
                   <button
                     onClick={() => {

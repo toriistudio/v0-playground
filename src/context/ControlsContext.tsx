@@ -12,20 +12,35 @@ import React, {
 
 import { getUrlParams, parseValue } from "@/utils/getUrlParams";
 
+type BaseControl = {
+  hidden?: boolean;
+};
+
 export type ControlType =
-  | { type: "boolean"; value: boolean }
-  | { type: "number"; value: number; min?: number; max?: number; step?: number }
-  | { type: "string"; value: string }
-  | { type: "color"; value: string }
-  | { type: "select"; value: string; options: string[] }
-  | {
+  | ({ type: "boolean"; value: boolean } & BaseControl)
+  | ({
+      type: "number";
+      value: number;
+      min?: number;
+      max?: number;
+      step?: number;
+    } & BaseControl)
+  | ({ type: "string"; value: string } & BaseControl)
+  | ({ type: "color"; value: string } & BaseControl)
+  | ({ type: "select"; value: string; options: string[] } & BaseControl)
+  | ({
       type: "button";
       onClick?: () => void;
       label?: string;
-      render?: () => React.ReactNode; // 👈 NEW
-    };
+      render?: () => React.ReactNode;
+    } & BaseControl);
 
 export type ControlsSchema = Record<string, ControlType>;
+
+type ControlsConfig = {
+  showCopyButton?: boolean;
+  mainLabel?: string;
+};
 
 type ControlsContextValue = {
   schema: ControlsSchema;
@@ -33,9 +48,13 @@ type ControlsContextValue = {
   setValue: (key: string, value: any) => void;
   registerSchema: (
     newSchema: ControlsSchema,
-    opts?: { componentName?: string }
+    opts?: {
+      componentName?: string;
+      config?: ControlsConfig;
+    }
   ) => void;
   componentName?: string;
+  config?: ControlsConfig;
 };
 
 const ControlsContext = createContext<ControlsContextValue | null>(null);
@@ -49,6 +68,9 @@ export const useControlsContext = () => {
 export const ControlsProvider = ({ children }: { children: ReactNode }) => {
   const [schema, setSchema] = useState<ControlsSchema>({});
   const [values, setValues] = useState<Record<string, any>>({});
+  const [config, setConfig] = useState<ControlsConfig>({
+    showCopyButton: true,
+  });
   const [componentName, setComponentName] = useState<string | undefined>();
 
   const setValue = (key: string, value: any) => {
@@ -57,31 +79,46 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
 
   const registerSchema = (
     newSchema: ControlsSchema,
-    opts?: { componentName?: string }
+    opts?: { componentName?: string; config?: ControlsConfig }
   ) => {
     if (opts?.componentName) {
       setComponentName(opts.componentName);
     }
 
+    if (opts?.config) {
+      setConfig((prev) => ({
+        ...prev,
+        ...opts.config,
+      }));
+    }
+
     setSchema((prevSchema) => ({ ...prevSchema, ...newSchema }));
     setValues((prevValues) => {
       const updated = { ...prevValues };
-      for (const key in newSchema) {
-        if (!(key in updated)) {
-          const control = newSchema[key];
 
+      for (const key in newSchema) {
+        const control = newSchema[key];
+        if (!(key in updated)) {
           if ("value" in control) {
             updated[key] = control.value;
           }
         }
       }
+
       return updated;
     });
   };
 
   const contextValue = useMemo(
-    () => ({ schema, values, setValue, registerSchema, componentName }),
-    [schema, values, componentName]
+    () => ({
+      schema,
+      values,
+      setValue,
+      registerSchema,
+      componentName,
+      config,
+    }),
+    [schema, values, componentName, config]
   );
 
   return (
@@ -93,7 +130,10 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
 
 export const useControls = <T extends ControlsSchema>(
   schema: T,
-  options?: { componentName?: string }
+  options?: {
+    componentName?: string;
+    config?: ControlsConfig;
+  }
 ) => {
   const ctx = useContext(ControlsContext);
   if (!ctx) throw new Error("useControls must be used within ControlsProvider");
@@ -138,7 +178,10 @@ export const useControls = <T extends ControlsSchema>(
 
 export const useUrlSyncedControls = <T extends ControlsSchema>(
   schema: T,
-  options?: { componentName?: string }
+  options?: {
+    componentName?: string;
+    config?: ControlsConfig;
+  }
 ) => {
   const urlParams = getUrlParams();
 
