@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { ResizableLayout } from "@/context/ResizableLayout";
 import { ControlsProvider } from "@/context/ControlsContext";
 import PreviewContainer from "@/components/PreviewContainer";
@@ -9,6 +9,12 @@ import ControlPanel from "@/components/ControlPanel";
 const NO_CONTROLS_PARAM = "nocontrols";
 
 export default function Playground({ children }: { children: ReactNode }) {
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const hideControls = useMemo(() => {
     if (typeof window === "undefined") return false;
     return (
@@ -16,6 +22,8 @@ export default function Playground({ children }: { children: ReactNode }) {
       "true"
     );
   }, []);
+
+  if (!isHydrated) return null;
 
   return (
     <ResizableLayout hideControls={hideControls}>
