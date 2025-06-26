@@ -70,7 +70,7 @@ const ControlPanel: React.FC = () => {
           : {}),
       }}
     >
-      <div className="space-y-4 p-2 md:p-4 border border-stone-700 rounded-md">
+      <div className="mb-4 space-y-4 p-2 md:p-4 border border-stone-700 rounded-md">
         <div className="space-y-1">
           <h1 className="text-lg text-stone-100 font-bold">Controls</h1>
         </div>
