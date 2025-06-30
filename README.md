@@ -100,6 +100,8 @@ export default function Scene() {
 }
 ```
 
+See [`examples/r3f-canvas`](./examples/r3f-canvas) for a full working example.
+
 ## 💡 Example Use Cases
 
 - Build custom component sandboxes
