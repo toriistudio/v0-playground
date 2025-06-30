@@ -22,7 +22,7 @@ Perfect for prototyping components, sharing usage examples, or building your own
 To use `@toriistudio/v0-playground`, you’ll need to install the following peer dependencies:
 
 ```bash
-yarn add @radix-ui/react-label @radix-ui/react-select @radix-ui/react-slider @radix-ui/react-slot @radix-ui/react-switch class-variance-authority clsx lucide-react tailwind-merge tailwindcss-animate
+yarn add @radix-ui/react-label @radix-ui/react-select @radix-ui/react-slider @radix-ui/react-slot @radix-ui/react-switch class-variance-authority clsx lucide-react tailwind-merge tailwindcss-animate @react-three/drei @react-three/fiber three lodash
 ```
 
 Or automate it with:
