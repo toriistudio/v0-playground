@@ -83,6 +83,23 @@ export default function App() {
 }
 ```
 
+### R3F Canvas
+
+`PlaygroundCanvas` wraps the playground with a react-three-fiber canvas. Pass any
+`Canvas` props through `mediaProps`:
+
+```ts
+import { PlaygroundCanvas } from "@toriistudio/v0-playground";
+
+export default function Scene() {
+  return (
+    <PlaygroundCanvas mediaProps={{ size: { width: 300, height: 300 } }}>
+      <MyR3FComponent />
+    </PlaygroundCanvas>
+  );
+}
+```
+
 ## 💡 Example Use Cases
 
 - Build custom component sandboxes
