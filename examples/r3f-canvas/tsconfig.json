@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["vite/client", "@react-three/fiber", "three"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"]
+}

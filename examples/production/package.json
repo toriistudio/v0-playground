@@ -12,8 +12,8 @@
     "@toriistudio/v0-playground": "latest",
     "clsx": "^2.1.1",
     "lucide-react": "^0.522.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.2",

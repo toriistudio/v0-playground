@@ -1,5 +1,5 @@
 {
-  "name": "v0-playground-example-basic",
+  "name": "v0-playground-example-r3f-canvas-advanced",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -9,12 +9,13 @@
     "reset": "rm -rf .yalc node_modules yarn.lock && yalc add @toriistudio/v0-playground && yarn"
   },
   "dependencies": {
-    "@toriistudio/glow-ui": "latest",
+    "@react-three/drei": "^10.3.0",
+    "@react-three/fiber": "^9.1.2",
     "@toriistudio/v0-playground": "file:.yalc/@toriistudio/v0-playground",
-    "clsx": "^2.1.1",
     "lucide-react": "^0.522.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.177.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.2",
@@ -22,6 +23,7 @@
     "postcss": "^8.4.24",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "vite-plugin-glsl": "^1.5.1"
   }
 }
