@@ -6,7 +6,7 @@ import Canvas, { CanvasMediaProps } from "@/components/Canvas";
 
 export type PlaygroundCanvasProps = {
   children: React.ReactNode;
-  mediaProps: CanvasMediaProps;
+  mediaProps?: CanvasMediaProps;
 };
 
 const PlaygroundCanvas: React.FC<PlaygroundCanvasProps> = ({

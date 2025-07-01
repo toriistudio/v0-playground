@@ -1,10 +1,14 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 
 import { PlaygroundCanvas, useControls } from "@toriistudio/v0-playground";
 
-function SpinningBox({ color }: { color: string }) {
+function SpinningBox() {
+  const { color } = useControls({
+    color: { type: "color", value: "#ff1b6f" },
+  });
+
   const ref = useRef<Mesh>(null);
   useFrame((_, delta) => {
     if (ref.current) {
@@ -21,13 +25,9 @@ function SpinningBox({ color }: { color: string }) {
 }
 
 export default function App() {
-  const { color } = useControls({
-    color: { type: "color", value: "#ff1b6f" },
-  });
-
   return (
-    <PlaygroundCanvas mediaProps={{ size: { width: 400, height: 400 }, debugOrbit: true }}>
-      <SpinningBox color={color} />
+    <PlaygroundCanvas>
+      <SpinningBox />
     </PlaygroundCanvas>
   );
 }

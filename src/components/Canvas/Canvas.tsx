@@ -12,7 +12,7 @@ export type CanvasMediaProps = {
 };
 
 type CanvasProps = {
-  mediaProps: CanvasMediaProps;
+  mediaProps?: CanvasMediaProps;
   children: React.ReactNode;
 };
 
@@ -70,7 +70,10 @@ const Canvas: React.FC<CanvasProps> = ({ mediaProps, children }) => {
     };
   }, []);
 
-  if (!mediaProps.size) return null;
+  const mergedMediaProps = {
+    ...(mediaProps || {}),
+    size: mediaProps?.size || { width: 400, height: 400 },
+  };
 
   return (
     <div
@@ -88,10 +91,10 @@ const Canvas: React.FC<CanvasProps> = ({ mediaProps, children }) => {
             width={parentSize.width}
           />
         )}
-        {mediaProps.debugOrbit && <CameraLogger />}
+        {mediaProps?.debugOrbit && <CameraLogger />}
         <ambientLight intensity={1} />
         <pointLight position={[10, 10, 10]} />
-        {React.cloneElement(children as React.ReactElement, mediaProps)}
+        {React.cloneElement(children as React.ReactElement, mergedMediaProps)}
       </ThreeCanvas>
     </div>
   );
