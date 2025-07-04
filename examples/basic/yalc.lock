@@ -2,11 +2,12 @@
   "version": "v1",
   "packages": {
     "@toriistudio/glow-ui": {
-      "signature": "2f26736e252a538076244308781c41b9",
-      "file": true
+      "signature": "a5715873e5739ee3514f9eec18d407d9",
+      "file": true,
+      "replaced": "latest"
     },
     "@toriistudio/v0-playground": {
-      "signature": "d2b9170b45d12d74285210aa3be4d946",
+      "signature": "15d7e6813a05df49e4f4abb730ee209d",
       "file": true
     }
   }

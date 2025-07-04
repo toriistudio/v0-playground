@@ -24,7 +24,9 @@ const PreviewContainer: React.FC<Props> = ({ children, hideControls }) => {
           : {}
       }
     >
-      {children}
+      <div className="w-screen h-screen flex items-center justify-center">
+        {children}
+      </div>
     </div>
   );
 };
