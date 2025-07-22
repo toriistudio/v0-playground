@@ -10,7 +10,7 @@ import React, {
   useCallback,
 } from "react";
 
-import { getUrlParams, parseValue } from "@/utils/getUrlParams";
+import { getUrlParams } from "@/utils/getUrlParams";
 
 type BaseControl = {
   hidden?: boolean;
@@ -40,6 +40,7 @@ export type ControlsSchema = Record<string, ControlType>;
 type ControlsConfig = {
   showCopyButton?: boolean;
   mainLabel?: string;
+  showGrid?: boolean;
 };
 
 type ControlsContextValue = {
@@ -138,7 +139,7 @@ export const useControls = <T extends ControlsSchema>(
   const ctx = useContext(ControlsContext);
   if (!ctx) throw new Error("useControls must be used within ControlsProvider");
 
-  // 1. Merge URL params with schema defaults
+  // Merge URL params with schema defaults
   const urlParams = getUrlParams();
 
   const mergedSchema = Object.fromEntries(
@@ -166,12 +167,12 @@ export const useControls = <T extends ControlsSchema>(
     })
   ) as T;
 
-  // 2. Register the merged schema
+  // Register the merged schema
   useEffect(() => {
     ctx.registerSchema(mergedSchema, options);
   }, [JSON.stringify(mergedSchema), JSON.stringify(options)]);
 
-  // 3. Set default values
+  // Set default values
   useEffect(() => {
     for (const key in mergedSchema) {
       if (!(key in ctx.values) && "value" in mergedSchema[key]) {
@@ -180,7 +181,7 @@ export const useControls = <T extends ControlsSchema>(
     }
   }, [JSON.stringify(mergedSchema), JSON.stringify(ctx.values)]);
 
-  // 4. Strongly-typed return values
+  // Strongly-typed return values
   const typedValues = ctx.values as {
     [K in keyof T]: T[K] extends { value: infer V } ? V : never;
   };

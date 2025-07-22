@@ -1,5 +1,7 @@
 import React, { useRef } from "react";
 import { useResizableLayout } from "@/context/ResizableLayout";
+import { useControlsContext } from "@/context/ControlsContext";
+import Grid from "@/components/Grid";
 
 type Props = {
   children?: React.ReactNode;
@@ -7,6 +9,7 @@ type Props = {
 };
 
 const PreviewContainer: React.FC<Props> = ({ children, hideControls }) => {
+  const { config } = useControlsContext();
   const { leftPanelWidth, isDesktop, isHydrated, containerRef } =
     useResizableLayout();
   const previewRef = useRef<HTMLDivElement>(null);
@@ -24,8 +27,11 @@ const PreviewContainer: React.FC<Props> = ({ children, hideControls }) => {
           : {}
       }
     >
-      <div className="w-screen h-screen flex items-center justify-center">
-        {children}
+      <div className="w-screen h-screen">
+        {config?.showGrid && <Grid />}
+        <div className="w-screen h-screen flex items-center justify-center relative">
+          {children}
+        </div>
       </div>
     </div>
   );

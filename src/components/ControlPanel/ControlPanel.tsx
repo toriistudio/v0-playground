@@ -23,8 +23,7 @@ import { Button } from "@/components/ui/button";
 const ControlPanel: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
-  const { leftPanelWidth, isDesktop, isHydrated, sidebarNarrow } =
-    useResizableLayout();
+  const { leftPanelWidth, isDesktop, isHydrated } = useResizableLayout();
 
   const { schema, setValue, values, componentName, config } =
     useControlsContext();

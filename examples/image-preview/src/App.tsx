@@ -45,7 +45,10 @@ function ImagePreview() {
     },
     {
       componentName: "ImagePreview",
-      config: { mainLabel: "Image Controls", showCopyButton: false },
+      config: {
+        mainLabel: "Image Controls",
+        showCopyButton: false,
+      },
     }
   );
 

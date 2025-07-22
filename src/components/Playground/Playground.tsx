@@ -4,8 +4,8 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { ResizableLayout } from "@/context/ResizableLayout";
 import { ControlsProvider } from "@/context/ControlsContext";
-import PreviewContainer from "@/components/PreviewContainer";
 import ControlPanel from "@/components/ControlPanel";
+import PreviewContainer from "@/components/PreviewContainer";
 
 const NO_CONTROLS_PARAM = "nocontrols";
 
