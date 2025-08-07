@@ -169,11 +169,13 @@ const ControlPanel: React.FC = () => {
                         <SelectValue placeholder="Select option" />
                       </SelectTrigger>
                       <SelectContent>
-                        {control.options.map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {opt}
-                          </SelectItem>
-                        ))}
+                        {Object.entries(control.options).map(
+                          ([label, _val]) => (
+                            <SelectItem key={label} value={label}>
+                              {label}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

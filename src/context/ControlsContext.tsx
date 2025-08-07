@@ -27,7 +27,11 @@ export type ControlType =
     } & BaseControl)
   | ({ type: "string"; value: string } & BaseControl)
   | ({ type: "color"; value: string } & BaseControl)
-  | ({ type: "select"; value: string; options: string[] } & BaseControl)
+  | ({
+      type: "select";
+      value: string;
+      options: Record<string, any>;
+    } & BaseControl)
   | ({
       type: "button";
       onClick?: () => void;

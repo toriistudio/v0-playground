@@ -27,12 +27,20 @@ function InnerPreview() {
     fileInputRef.current?.click();
   };
 
+  const easingFns = {
+    linear: (t: number) => t,
+    easeInOutCubic: (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+    easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
+  };
+
   const {
     pictureUrl,
     pointSizeBase,
     displacementStrength,
     glowSizeFactor,
     intensityScale,
+    easing,
     color,
     setValue,
   } = useControls({
@@ -64,6 +72,11 @@ function InnerPreview() {
     },
     intensityScale: { type: "number", value: 1, min: 0, max: 5, step: 0.01 },
     color: { type: "color", value: "#ffffff" },
+    easing: {
+      options: easingFns,
+      value: "easeOutCubic",
+      type: "select",
+    },
     imageUpload: {
       type: "button",
       render: () => (
