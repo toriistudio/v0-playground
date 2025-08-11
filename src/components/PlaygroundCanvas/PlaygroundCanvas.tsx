@@ -12,10 +12,13 @@ export type PlaygroundCanvasProps = {
 const PlaygroundCanvas: React.FC<PlaygroundCanvasProps> = ({
   children,
   mediaProps,
+  ...otherProps
 }) => {
   return (
     <Playground>
-      <Canvas mediaProps={mediaProps}>{children}</Canvas>
+      <Canvas mediaProps={mediaProps} {...otherProps}>
+        {children}
+      </Canvas>
     </Playground>
   );
 };
