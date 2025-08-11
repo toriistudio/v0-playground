@@ -35,7 +35,11 @@ const ResponsiveCamera = ({
   return null;
 };
 
-const Canvas: React.FC<CanvasProps> = ({ mediaProps, children }) => {
+const Canvas: React.FC<CanvasProps> = ({
+  mediaProps,
+  children,
+  ...otherProps
+}) => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [parentSize, setParentSize] = useState<{
@@ -84,6 +88,7 @@ const Canvas: React.FC<CanvasProps> = ({ mediaProps, children }) => {
         resize={{ polyfill: ResizeObserver }}
         style={{ width: parentSize?.width, height: parentSize?.height }}
         gl={{ preserveDrawingBuffer: true }}
+        {...otherProps}
       >
         {parentSize?.height && parentSize?.width && (
           <ResponsiveCamera
