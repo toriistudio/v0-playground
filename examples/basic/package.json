@@ -9,7 +9,7 @@
     "reset": "rm -rf .yalc node_modules yarn.lock && yalc add @toriistudio/v0-playground && yarn"
   },
   "dependencies": {
-    "@toriistudio/glow-ui": "file:.yalc/@toriistudio/glow-ui",
+    "@toriistudio/glow-ui": "latest",
     "@toriistudio/v0-playground": "file:.yalc/@toriistudio/v0-playground",
     "clsx": "^2.1.1",
     "lucide-react": "^0.522.0",
