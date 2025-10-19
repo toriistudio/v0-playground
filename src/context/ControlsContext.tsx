@@ -8,12 +8,28 @@ import React, {
   useEffect,
   type ReactNode,
   useCallback,
+  useRef,
 } from "react";
 
 import { getUrlParams } from "@/utils/getUrlParams";
+import {
+  CHANNEL_KEYS,
+  clonePalette,
+  createAdvancedPaletteSchemaEntries,
+  createPaletteControlKey,
+  createPaletteSignature,
+  resolveAdvancedPaletteConfig,
+  toNumberOr,
+  type AdvancedPalette,
+  type AdvancedPaletteControlConfig,
+  type PaletteChannelKey,
+  type ResolvedAdvancedPaletteConfig,
+} from "@/lib/advancedPalette";
 
 type BaseControl = {
   hidden?: boolean;
+  folder?: string;
+  folderPlacement?: "top" | "bottom";
 };
 
 export type ControlType =
@@ -41,10 +57,32 @@ export type ControlType =
 
 export type ControlsSchema = Record<string, ControlType>;
 
+type CopyButtonFnArgs = {
+  componentName?: string;
+  values: Record<string, any>;
+  schema: ControlsSchema;
+  jsx: string;
+  jsonToComponentString: (options: {
+    componentName?: string;
+    props: Record<string, unknown>;
+  }) => string;
+};
+
 type ControlsConfig = {
   showCopyButton?: boolean;
+  showCopyButtonFn?: (args: CopyButtonFnArgs) => string | null | undefined;
   mainLabel?: string;
   showGrid?: boolean;
+  addAdvancedPaletteControl?: ResolvedAdvancedPaletteConfig;
+};
+
+type UseControlsConfig = Omit<ControlsConfig, "addAdvancedPaletteControl"> & {
+  addAdvancedPaletteControl?: AdvancedPaletteControlConfig;
+};
+
+type UseControlsOptions = {
+  componentName?: string;
+  config?: UseControlsConfig;
 };
 
 type ControlsContextValue = {
@@ -55,7 +93,7 @@ type ControlsContextValue = {
     newSchema: ControlsSchema,
     opts?: {
       componentName?: string;
-      config?: ControlsConfig;
+      config?: UseControlsConfig;
     }
   ) => void;
   componentName?: string;
@@ -84,16 +122,28 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
 
   const registerSchema = (
     newSchema: ControlsSchema,
-    opts?: { componentName?: string; config?: ControlsConfig }
+    opts?: { componentName?: string; config?: UseControlsConfig }
   ) => {
     if (opts?.componentName) {
       setComponentName(opts.componentName);
     }
 
     if (opts?.config) {
+      const { addAdvancedPaletteControl, ...otherConfig } = opts.config;
+
       setConfig((prev) => ({
         ...prev,
-        ...opts.config,
+        ...otherConfig,
+        ...(Object.prototype.hasOwnProperty.call(
+          opts.config,
+          "addAdvancedPaletteControl"
+        )
+          ? {
+              addAdvancedPaletteControl: addAdvancedPaletteControl
+                ? resolveAdvancedPaletteConfig(addAdvancedPaletteControl)
+                : undefined,
+            }
+          : {}),
       }));
     }
 
@@ -135,41 +185,56 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
 
 export const useControls = <T extends ControlsSchema>(
   schema: T,
-  options?: {
-    componentName?: string;
-    config?: ControlsConfig;
-  }
+  options?: UseControlsOptions
 ) => {
   const ctx = useContext(ControlsContext);
   if (!ctx) throw new Error("useControls must be used within ControlsProvider");
+  const lastAdvancedPaletteSignature = useRef<string | null>(null);
 
   // Merge URL params with schema defaults
   const urlParams = getUrlParams();
 
-  const mergedSchema = Object.fromEntries(
-    Object.entries(schema).map(([key, control]) => {
-      const urlValue = urlParams[key];
-      if (!urlValue || !("value" in control)) return [key, control];
+  const resolvedAdvancedConfig = options?.config?.addAdvancedPaletteControl
+    ? resolveAdvancedPaletteConfig(options.config.addAdvancedPaletteControl)
+    : undefined;
 
-      const defaultValue = control.value;
+  const schemaWithAdvanced = useMemo(() => {
+    const baseSchema: ControlsSchema = { ...schema };
+    if (!resolvedAdvancedConfig) return baseSchema;
+    return createAdvancedPaletteSchemaEntries(
+      baseSchema,
+      resolvedAdvancedConfig
+    );
+  }, [schema, resolvedAdvancedConfig]);
 
-      let parsed: any = urlValue;
-      if (typeof defaultValue === "number") {
-        parsed = parseFloat(urlValue);
-        if (isNaN(parsed)) parsed = defaultValue;
-      } else if (typeof defaultValue === "boolean") {
-        parsed = urlValue === "true";
-      }
+  const urlParamsKey = useMemo(() => JSON.stringify(urlParams), [urlParams]);
 
-      return [
-        key,
-        {
-          ...control,
-          value: parsed,
-        },
-      ];
-    })
-  ) as T;
+  const mergedSchema = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(schemaWithAdvanced).map(([key, control]) => {
+        const urlValue = urlParams[key];
+        if (!urlValue || !("value" in control)) return [key, control];
+
+        const defaultValue = control.value;
+
+        let parsed: any = urlValue;
+        if (typeof defaultValue === "number") {
+          parsed = parseFloat(urlValue);
+          if (isNaN(parsed)) parsed = defaultValue;
+        } else if (typeof defaultValue === "boolean") {
+          parsed = urlValue === "true";
+        }
+
+        return [
+          key,
+          {
+            ...control,
+            value: parsed,
+          },
+        ];
+      })
+    ) as ControlsSchema;
+  }, [schemaWithAdvanced, urlParams, urlParamsKey]);
 
   // Register the merged schema
   useEffect(() => {
@@ -184,6 +249,40 @@ export const useControls = <T extends ControlsSchema>(
       }
     }
   }, [JSON.stringify(mergedSchema), JSON.stringify(ctx.values)]);
+
+  useEffect(() => {
+    if (!resolvedAdvancedConfig?.onPaletteChange) return;
+
+    const palette = resolvedAdvancedConfig.sections.reduce<AdvancedPalette>(
+      (acc, section) => {
+        const channels = CHANNEL_KEYS.reduce<Record<PaletteChannelKey, number>>(
+          (channelAcc, channel) => {
+            const key = createPaletteControlKey(
+              resolvedAdvancedConfig.hiddenKeyPrefix,
+              section.key,
+              channel
+            );
+            const fallback =
+              resolvedAdvancedConfig.defaultPalette?.[section.key]?.[channel] ??
+              0;
+            channelAcc[channel] = toNumberOr(ctx.values[key], fallback);
+            return channelAcc;
+          },
+          {} as Record<PaletteChannelKey, number>
+        );
+
+        acc[section.key] = channels;
+        return acc;
+      },
+      {} as AdvancedPalette
+    );
+
+    const signature = createPaletteSignature(palette);
+    if (lastAdvancedPaletteSignature.current === signature) return;
+
+    lastAdvancedPaletteSignature.current = signature;
+    resolvedAdvancedConfig.onPaletteChange(clonePalette(palette));
+  }, [ctx.values, resolvedAdvancedConfig]);
 
   // Strongly-typed return values
   const typedValues = ctx.values as {

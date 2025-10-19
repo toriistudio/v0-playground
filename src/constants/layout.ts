@@ -1,0 +1,1 @@
+export const MOBILE_CONTROL_PANEL_PEEK = 112;

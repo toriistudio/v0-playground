@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["node", "@react-three/fiber"],
+    "types": ["node"],
     "target": "es2016",
     "module": "esnext",
     "jsx": "react-jsx",

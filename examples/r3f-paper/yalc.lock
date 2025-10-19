@@ -1,10 +1,9 @@
 {
   "version": "v1",
   "packages": {
-    "@toriistudio/glow-ui": {
-      "signature": "7003fdcfb348b0522dede74adae33b33",
-      "file": true,
-      "replaced": "latest"
+    "@toriistudio/v0-playground-canvas": {
+      "signature": "38aae0a3d6044a2d87921bae374769ff",
+      "file": true
     },
     "@toriistudio/v0-playground": {
       "signature": "832f90c7fa0ca70101025314e152be11",
