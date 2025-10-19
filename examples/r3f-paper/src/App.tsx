@@ -6,7 +6,6 @@ import {
   useAdvancedPaletteControls,
   useControls,
 } from "@toriistudio/v0-playground";
-import { Html } from "@react-three/drei";
 
 import { MeshGradient } from "@paper-design/shaders-react";
 
