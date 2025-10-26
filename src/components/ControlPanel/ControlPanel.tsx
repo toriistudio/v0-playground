@@ -42,6 +42,11 @@ const ControlPanel: React.FC = () => {
   const { schema, setValue, values, componentName, config } =
     useControlsContext();
 
+  const isControlsOnlyView =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get(CONTROLS_ONLY_PARAM) ===
+      "true";
+
   const previewUrl = usePreviewUrl(values);
 
   const buildUrl = useCallback(
@@ -473,7 +478,7 @@ const ControlPanel: React.FC = () => {
     flex: "0 0 auto",
   };
 
-  if (isHydrated) {
+  if (isHydrated && !isControlsOnlyView) {
     if (isDesktop) {
       Object.assign(panelStyle, {
         position: "absolute",
