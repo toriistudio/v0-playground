@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { NO_CONTROLS_PARAM } from "@/constants/urlParams";
+
 export const usePreviewUrl = (
   values: Record<string, any>,
   basePath: string = ""
@@ -10,7 +12,7 @@ export const usePreviewUrl = (
     if (typeof window === "undefined") return;
 
     const params = new URLSearchParams();
-    params.set("nocontrols", "true");
+    params.set(NO_CONTROLS_PARAM, "true");
 
     for (const [key, value] of Object.entries(values)) {
       if (value !== undefined && value !== null) {

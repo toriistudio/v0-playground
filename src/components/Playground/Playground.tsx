@@ -6,8 +6,10 @@ import { ResizableLayout } from "@/context/ResizableLayout";
 import { ControlsProvider } from "@/context/ControlsContext";
 import ControlPanel from "@/components/ControlPanel";
 import PreviewContainer from "@/components/PreviewContainer";
-
-const NO_CONTROLS_PARAM = "nocontrols";
+import {
+  NO_CONTROLS_PARAM,
+  PRESENTATION_PARAM,
+} from "@/constants/urlParams";
 
 export default function Playground({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -17,13 +19,17 @@ export default function Playground({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  const hideControls = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return (
-      new URLSearchParams(window.location.search).get(NO_CONTROLS_PARAM) ===
-      "true"
-    );
+  const { hideControls, isPresentationMode } = useMemo(() => {
+    if (typeof window === "undefined") {
+      return { hideControls: false, isPresentationMode: false };
+    }
+    const params = new URLSearchParams(window.location.search);
+    const presentation = params.get(PRESENTATION_PARAM) === "true";
+    const shouldHideControls =
+      presentation || params.get(NO_CONTROLS_PARAM) === "true";
+    return { hideControls: shouldHideControls, isPresentationMode: presentation };
   }, []);
+  const shouldShowShareButton = hideControls && !isPresentationMode;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -36,7 +42,7 @@ export default function Playground({ children }: { children: ReactNode }) {
   return (
     <ResizableLayout hideControls={hideControls}>
       <ControlsProvider>
-        {hideControls && (
+        {shouldShowShareButton && (
           <button
             onClick={handleCopy}
             className="absolute top-4 right-4 z-50 flex items-center gap-1 rounded bg-black/70 px-3 py-1 text-white hover:bg-black"

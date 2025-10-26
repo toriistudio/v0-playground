@@ -20,6 +20,7 @@ import { useControlsContext } from "@/context/ControlsContext";
 
 import { Button } from "@/components/ui/button";
 import { MOBILE_CONTROL_PANEL_PEEK } from "@/constants/layout";
+import { PRESENTATION_PARAM } from "@/constants/urlParams";
 import AdvancedPaletteControl from "@/components/AdvancedPaletteControl";
 
 const ControlPanel: React.FC = () => {
@@ -32,6 +33,11 @@ const ControlPanel: React.FC = () => {
     useControlsContext();
 
   const previewUrl = usePreviewUrl(values);
+  const presentationUrl = useMemo(() => {
+    if (!previewUrl) return "";
+    const separator = previewUrl.includes("?") ? "&" : "?";
+    return `${previewUrl}${separator}${PRESENTATION_PARAM}=true`;
+  }, [previewUrl]);
 
   const jsx = useMemo(() => {
     if (!componentName) return "";
@@ -478,16 +484,34 @@ const ControlPanel: React.FC = () => {
           )}
         </div>
         {previewUrl && (
-          <Button asChild>
-            <a
-              href={previewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full px-4 py-2 text-sm text-center bg-stone-900 hover:bg-stone-800 text-white rounded-md border border-stone-700"
-            >
-              <SquareArrowOutUpRight /> Open in a New Tab
-            </a>
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button asChild className="flex-1">
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full px-4 py-2 text-sm text-center bg-stone-900 hover:bg-stone-800 text-white rounded-md border border-stone-700"
+              >
+                <SquareArrowOutUpRight /> Open in a New Tab
+              </a>
+            </Button>
+            {config?.showPresentationButton && presentationUrl && (
+              <Button
+                asChild
+                variant="secondary"
+                className="flex-1 bg-stone-800 text-white hover:bg-stone-700 border border-stone-700"
+              >
+                <a
+                  href={presentationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-4 py-2 text-sm text-center flex items-center justify-center gap-2"
+                >
+                  <SquareArrowOutUpRight /> Presentation Mode
+                </a>
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </div>

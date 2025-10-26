@@ -73,6 +73,7 @@ type ControlsConfig = {
   showCopyButtonFn?: (args: CopyButtonFnArgs) => string | null | undefined;
   mainLabel?: string;
   showGrid?: boolean;
+  showPresentationButton?: boolean;
   addAdvancedPaletteControl?: ResolvedAdvancedPaletteConfig;
 };
 
