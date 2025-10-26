@@ -48,6 +48,7 @@ function ImagePreview() {
       config: {
         mainLabel: "Image Controls",
         showCopyButton: false,
+        showPresentationButton: true,
       },
     }
   );

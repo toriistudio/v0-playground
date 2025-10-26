@@ -46,6 +46,9 @@ function BasicComponent() {
     },
     {
       componentName: "GlowButton",
+      config: {
+        showPresentationButton: true,
+      },
     }
   );
 

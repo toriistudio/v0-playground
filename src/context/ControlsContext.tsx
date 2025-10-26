@@ -12,6 +12,7 @@ import React, {
 } from "react";
 
 import { getUrlParams } from "@/utils/getUrlParams";
+import { getControlsChannelName } from "@/utils/getControlsChannelName";
 import {
   CHANNEL_KEYS,
   clonePalette,
@@ -103,6 +104,14 @@ type ControlsContextValue = {
 
 const ControlsContext = createContext<ControlsContextValue | null>(null);
 
+type ControlsSyncMessage =
+  | { type: "controls-sync-request"; source: string }
+  | {
+      type: "controls-sync-values";
+      source: string;
+      values: Record<string, any>;
+    };
+
 export const useControlsContext = () => {
   const ctx = useContext(ControlsContext);
   if (!ctx) throw new Error("useControls must be used within ControlsProvider");
@@ -116,6 +125,20 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
     showCopyButton: true,
   });
   const [componentName, setComponentName] = useState<string | undefined>();
+  const [channelName, setChannelName] = useState<string | null>(null);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+  const instanceIdRef = useRef<string | null>(null);
+  const skipBroadcastRef = useRef(false);
+  const latestValuesRef = useRef(values);
+
+  useEffect(() => {
+    latestValuesRef.current = values;
+  }, [values]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setChannelName(getControlsChannelName());
+  }, []);
 
   const setValue = (key: string, value: any) => {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -164,6 +187,80 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
       return updated;
     });
   };
+
+  useEffect(() => {
+    if (!channelName) return;
+    if (typeof window === "undefined") return;
+    if (typeof window.BroadcastChannel === "undefined") return;
+
+    const instanceId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2);
+    instanceIdRef.current = instanceId;
+    const channel = new BroadcastChannel(channelName);
+    channelRef.current = channel;
+
+    const sendValues = () => {
+      if (!instanceIdRef.current) return;
+      channel.postMessage({
+        type: "controls-sync-values",
+        source: instanceIdRef.current,
+        values: latestValuesRef.current,
+      } satisfies ControlsSyncMessage);
+    };
+
+    const handleMessage = (event: MessageEvent<ControlsSyncMessage>) => {
+      const data = event.data;
+      if (!data || data.source === instanceIdRef.current) return;
+
+      if (data.type === "controls-sync-request") {
+        sendValues();
+        return;
+      }
+
+      if (data.type === "controls-sync-values" && data.values) {
+        const incoming = data.values;
+        setValues((prev) => {
+          const prevKeys = Object.keys(prev);
+          const incomingKeys = Object.keys(incoming);
+          const sameLength = prevKeys.length === incomingKeys.length;
+          const sameValues =
+            sameLength &&
+            incomingKeys.every((key) => prev[key] === incoming[key]);
+          if (sameValues) return prev;
+          skipBroadcastRef.current = true;
+          return { ...incoming };
+        });
+      }
+    };
+
+    channel.addEventListener("message", handleMessage);
+    channel.postMessage({
+      type: "controls-sync-request",
+      source: instanceId,
+    } satisfies ControlsSyncMessage);
+
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+      channelRef.current = null;
+      instanceIdRef.current = null;
+    };
+  }, [channelName]);
+
+  useEffect(() => {
+    if (!channelRef.current || !instanceIdRef.current) return;
+    if (skipBroadcastRef.current) {
+      skipBroadcastRef.current = false;
+      return;
+    }
+    channelRef.current.postMessage({
+      type: "controls-sync-values",
+      source: instanceIdRef.current,
+      values,
+    } satisfies ControlsSyncMessage);
+  }, [values]);
 
   const contextValue = useMemo(
     () => ({

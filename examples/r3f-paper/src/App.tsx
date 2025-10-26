@@ -84,6 +84,7 @@ function MeshGradientScene() {
       mainLabel: "Mesh Gradient Controls",
       showGrid: false,
       showCopyButtonFn,
+      showPresentationButton: true,
       addAdvancedPaletteControl: controlConfig,
     },
   });

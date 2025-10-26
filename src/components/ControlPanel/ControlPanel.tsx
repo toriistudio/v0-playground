@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { Check, Copy, SquareArrowOutUpRight, ChevronDown } from "lucide-react";
+import {
+  Check,
+  Copy,
+  SquareArrowOutUpRight,
+  ChevronDown,
+  Presentation,
+} from "lucide-react";
 
 import { usePreviewUrl } from "@/hooks/usePreviewUrl";
 import { Switch } from "@/components/ui/switch";
@@ -20,7 +26,11 @@ import { useControlsContext } from "@/context/ControlsContext";
 
 import { Button } from "@/components/ui/button";
 import { MOBILE_CONTROL_PANEL_PEEK } from "@/constants/layout";
-import { PRESENTATION_PARAM } from "@/constants/urlParams";
+import {
+  CONTROLS_ONLY_PARAM,
+  NO_CONTROLS_PARAM,
+  PRESENTATION_PARAM,
+} from "@/constants/urlParams";
 import AdvancedPaletteControl from "@/components/AdvancedPaletteControl";
 
 const ControlPanel: React.FC = () => {
@@ -33,11 +43,65 @@ const ControlPanel: React.FC = () => {
     useControlsContext();
 
   const previewUrl = usePreviewUrl(values);
+
+  const buildUrl = useCallback(
+    (modifier: (params: URLSearchParams) => void) => {
+      if (!previewUrl) return "";
+      const [path, search = ""] = previewUrl.split("?");
+      const params = new URLSearchParams(search);
+      modifier(params);
+      const query = params.toString();
+      return query ? `${path}?${query}` : path;
+    },
+    [previewUrl]
+  );
+
   const presentationUrl = useMemo(() => {
     if (!previewUrl) return "";
-    const separator = previewUrl.includes("?") ? "&" : "?";
-    return `${previewUrl}${separator}${PRESENTATION_PARAM}=true`;
-  }, [previewUrl]);
+    return buildUrl((params) => {
+      params.set(PRESENTATION_PARAM, "true");
+    });
+  }, [buildUrl, previewUrl]);
+
+  const controlsOnlyUrl = useMemo(() => {
+    if (!previewUrl) return "";
+    return buildUrl((params) => {
+      params.delete(NO_CONTROLS_PARAM);
+      params.delete(PRESENTATION_PARAM);
+      params.set(CONTROLS_ONLY_PARAM, "true");
+    });
+  }, [buildUrl, previewUrl]);
+
+  const handlePresentationClick = useCallback(() => {
+    if (typeof window === "undefined" || !presentationUrl) return;
+
+    window.open(presentationUrl, "_blank", "noopener,noreferrer");
+
+    if (controlsOnlyUrl) {
+      const viewportWidth = window.innerWidth || 1200;
+      const viewportHeight = window.innerHeight || 900;
+      const controlsWidth = Math.max(
+        320,
+        Math.min(
+          600,
+          Math.round((viewportWidth * leftPanelWidth) / 100)
+        )
+      );
+      const controlsHeight = Math.max(600, viewportHeight);
+      const controlsFeatures = [
+        "noopener",
+        "noreferrer",
+        "toolbar=0",
+        "menubar=0",
+        "resizable=yes",
+        "scrollbars=yes",
+        `width=${controlsWidth}`,
+        `height=${controlsHeight}`,
+      ].join(",");
+
+      window.open(controlsOnlyUrl, "v0-controls", controlsFeatures);
+    }
+  }, [controlsOnlyUrl, leftPanelWidth, presentationUrl]);
 
   const jsx = useMemo(() => {
     if (!componentName) return "";
@@ -484,8 +548,8 @@ const ControlPanel: React.FC = () => {
           )}
         </div>
         {previewUrl && (
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button asChild className="flex-1">
+          <div className="flex flex-col gap-2">
+            <Button asChild className="w-full">
               <a
                 href={previewUrl}
                 target="_blank"
@@ -497,18 +561,12 @@ const ControlPanel: React.FC = () => {
             </Button>
             {config?.showPresentationButton && presentationUrl && (
               <Button
-                asChild
+                type="button"
+                onClick={handlePresentationClick}
                 variant="secondary"
-                className="flex-1 bg-stone-800 text-white hover:bg-stone-700 border border-stone-700"
+                className="w-full bg-stone-800 text-white hover:bg-stone-700 border border-stone-700"
               >
-                <a
-                  href={presentationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full px-4 py-2 text-sm text-center flex items-center justify-center gap-2"
-                >
-                  <SquareArrowOutUpRight /> Presentation Mode
-                </a>
+                <Presentation /> Presentation Mode
               </Button>
             )}
           </div>

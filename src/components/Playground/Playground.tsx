@@ -7,9 +7,16 @@ import { ControlsProvider } from "@/context/ControlsContext";
 import ControlPanel from "@/components/ControlPanel";
 import PreviewContainer from "@/components/PreviewContainer";
 import {
+  CONTROLS_ONLY_PARAM,
   NO_CONTROLS_PARAM,
   PRESENTATION_PARAM,
 } from "@/constants/urlParams";
+
+const HiddenPreview = ({ children }: { children: ReactNode }) => (
+  <div aria-hidden="true" className="hidden">
+    {children}
+  </div>
+);
 
 export default function Playground({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -19,17 +26,27 @@ export default function Playground({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  const { hideControls, isPresentationMode } = useMemo(() => {
+  const { showControls, isPresentationMode, isControlsOnly } = useMemo(() => {
     if (typeof window === "undefined") {
-      return { hideControls: false, isPresentationMode: false };
+      return {
+        showControls: true,
+        isPresentationMode: false,
+        isControlsOnly: false,
+      };
     }
     const params = new URLSearchParams(window.location.search);
     const presentation = params.get(PRESENTATION_PARAM) === "true";
-    const shouldHideControls =
-      presentation || params.get(NO_CONTROLS_PARAM) === "true";
-    return { hideControls: shouldHideControls, isPresentationMode: presentation };
+    const controlsOnly = params.get(CONTROLS_ONLY_PARAM) === "true";
+    const noControlsParam = params.get(NO_CONTROLS_PARAM) === "true";
+    const showControlsValue = controlsOnly || (!presentation && !noControlsParam);
+    return {
+      showControls: showControlsValue,
+      isPresentationMode: presentation,
+      isControlsOnly: controlsOnly,
+    };
   }, []);
-  const shouldShowShareButton = hideControls && !isPresentationMode;
+  const shouldShowShareButton = !showControls && !isPresentationMode;
+  const layoutHideControls = !showControls || isControlsOnly;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -40,7 +57,7 @@ export default function Playground({ children }: { children: ReactNode }) {
   if (!isHydrated) return null;
 
   return (
-    <ResizableLayout hideControls={hideControls}>
+    <ResizableLayout hideControls={layoutHideControls}>
       <ControlsProvider>
         {shouldShowShareButton && (
           <button
@@ -51,10 +68,14 @@ export default function Playground({ children }: { children: ReactNode }) {
             {copied ? "Copied!" : "Share"}
           </button>
         )}
-        <PreviewContainer hideControls={hideControls}>
-          {children}
-        </PreviewContainer>
-        {!hideControls && <ControlPanel />}
+        {isControlsOnly ? (
+          <HiddenPreview>{children}</HiddenPreview>
+        ) : (
+          <PreviewContainer hideControls={layoutHideControls}>
+            {children}
+          </PreviewContainer>
+        )}
+        {showControls && <ControlPanel />}
       </ControlsProvider>
     </ResizableLayout>
   );
