@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   Check,
   Copy,
@@ -33,9 +33,277 @@ import {
 } from "@/constants/urlParams";
 import AdvancedPaletteControl from "@/components/AdvancedPaletteControl";
 
+const splitPropsString = (input: string) => {
+  const props: string[] = [];
+  let current = "";
+  let curlyDepth = 0;
+  let squareDepth = 0;
+  let parenDepth = 0;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inBacktick = false;
+  let escapeNext = false;
+
+  for (const char of input) {
+    if (escapeNext) {
+      current += char;
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      current += char;
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === "'" && !inDoubleQuote && !inBacktick) {
+      inSingleQuote = !inSingleQuote;
+      current += char;
+      continue;
+    }
+
+    if (char === '"' && !inSingleQuote && !inBacktick) {
+      inDoubleQuote = !inDoubleQuote;
+      current += char;
+      continue;
+    }
+
+    if (char === "`" && !inSingleQuote && !inDoubleQuote) {
+      inBacktick = !inBacktick;
+      current += char;
+      continue;
+    }
+
+    if (!inSingleQuote && !inDoubleQuote && !inBacktick) {
+      if (char === "{") {
+        curlyDepth += 1;
+      } else if (char === "}") {
+        curlyDepth = Math.max(0, curlyDepth - 1);
+      } else if (char === "[") {
+        squareDepth += 1;
+      } else if (char === "]") {
+        squareDepth = Math.max(0, squareDepth - 1);
+      } else if (char === "(") {
+        parenDepth += 1;
+      } else if (char === ")") {
+        parenDepth = Math.max(0, parenDepth - 1);
+      }
+    }
+
+    const atTopLevel =
+      !inSingleQuote &&
+      !inDoubleQuote &&
+      !inBacktick &&
+      curlyDepth === 0 &&
+      squareDepth === 0 &&
+      parenDepth === 0;
+
+    if (atTopLevel && /\s/.test(char)) {
+      if (current.trim()) {
+        props.push(current.trim());
+      }
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  if (current.trim()) {
+    props.push(current.trim());
+  }
+
+  return props;
+};
+
+const formatJsxCodeSnippet = (input: string) => {
+  const trimmed = input.trim();
+  if (!trimmed) return "";
+  if (trimmed.includes("\n")) {
+    return trimmed;
+  }
+  if (!trimmed.startsWith("<") || !trimmed.endsWith(">")) {
+    return trimmed;
+  }
+  if (!trimmed.endsWith("/>")) {
+    return trimmed;
+  }
+
+  const inner = trimmed.slice(1, -2).trim();
+  const firstSpaceIndex = inner.indexOf(" ");
+
+  if (firstSpaceIndex === -1) {
+    return `<${inner} />`;
+  }
+
+  const componentName = inner.slice(0, firstSpaceIndex);
+  const propsString = inner.slice(firstSpaceIndex + 1).trim();
+
+  if (!propsString) {
+    return `<${componentName} />`;
+  }
+
+  const propsList = splitPropsString(propsString);
+  if (propsList.length === 0) {
+    return `<${componentName} ${propsString} />`;
+  }
+
+  const formattedProps = propsList.map((prop) => `  ${prop}`).join("\n");
+  return `<${componentName}\n${formattedProps}\n/>`;
+};
+
+type HighlightToken =
+  | { type: "plain"; value: string }
+  | {
+      type: "tag" | "attrName" | "string" | "expression" | "punctuation";
+      value: string;
+    };
+
+const isWhitespace = (char: string) => /\s/.test(char);
+const isAttrNameChar = (char: string) => /[A-Za-z0-9_$\-.:]/.test(char);
+const isAlphaStart = (char: string) => /[A-Za-z_$]/.test(char);
+
+const tokenizeJsx = (input: string): HighlightToken[] => {
+  const tokens: HighlightToken[] = [];
+  let i = 0;
+
+  while (i < input.length) {
+    const char = input[i];
+
+    if (char === "<") {
+      tokens.push({ type: "punctuation", value: "<" });
+      i += 1;
+
+      if (input[i] === "/") {
+        tokens.push({ type: "punctuation", value: "/" });
+        i += 1;
+      }
+
+      const start = i;
+      while (i < input.length && isAttrNameChar(input[i])) {
+        i += 1;
+      }
+      if (i > start) {
+        tokens.push({ type: "tag", value: input.slice(start, i) });
+      }
+      continue;
+    }
+
+    if (char === "/" && input[i + 1] === ">") {
+      tokens.push({ type: "punctuation", value: "/>" });
+      i += 2;
+      continue;
+    }
+
+    if (char === ">") {
+      tokens.push({ type: "punctuation", value: ">" });
+      i += 1;
+      continue;
+    }
+
+    if (char === "=") {
+      tokens.push({ type: "punctuation", value: "=" });
+      i += 1;
+      continue;
+    }
+
+    if (char === '"' || char === "'" || char === "`") {
+      const quote = char;
+      let j = i + 1;
+      let value = quote;
+      while (j < input.length) {
+        const current = input[j];
+        value += current;
+        if (current === quote && input[j - 1] !== "\\") {
+          break;
+        }
+        j += 1;
+      }
+      tokens.push({ type: "string", value });
+      i = j + 1;
+      continue;
+    }
+
+    if (char === "{") {
+      let depth = 1;
+      let j = i + 1;
+      while (j < input.length && depth > 0) {
+        if (input[j] === "{") {
+          depth += 1;
+        } else if (input[j] === "}") {
+          depth -= 1;
+        }
+        j += 1;
+      }
+      const expression = input.slice(i, j);
+      tokens.push({ type: "expression", value: expression });
+      i = j;
+      continue;
+    }
+
+    if (isAlphaStart(char)) {
+      const start = i;
+      i += 1;
+      while (i < input.length && isAttrNameChar(input[i])) {
+        i += 1;
+      }
+      const word = input.slice(start, i);
+      let k = i;
+      while (k < input.length && isWhitespace(input[k])) {
+        k += 1;
+      }
+      if (input[k] === "=") {
+        tokens.push({ type: "attrName", value: word });
+      } else {
+        tokens.push({ type: "plain", value: word });
+      }
+      continue;
+    }
+
+    tokens.push({ type: "plain", value: char });
+    i += 1;
+  }
+
+  return tokens;
+};
+
+const TOKEN_CLASS_MAP: Record<
+  Exclude<HighlightToken["type"], "plain">,
+  string
+> = {
+  tag: "text-sky-300",
+  attrName: "text-amber-200",
+  string: "text-emerald-300",
+  expression: "text-purple-300",
+  punctuation: "text-stone-400",
+};
+
+const highlightJsx = (input: string): React.ReactNode[] => {
+  const tokens = tokenizeJsx(input);
+  const nodes: React.ReactNode[] = [];
+
+  tokens.forEach((token, index) => {
+    if (token.type === "plain") {
+      nodes.push(token.value);
+    } else {
+      nodes.push(
+        <span key={`token-${index}`} className={TOKEN_CLASS_MAP[token.type]}>
+          {token.value}
+        </span>
+      );
+    }
+  });
+
+  return nodes;
+};
+
 const ControlPanel: React.FC = () => {
   const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [isCodeVisible, setIsCodeVisible] = useState(false);
   const [folderStates, setFolderStates] = useState<Record<string, boolean>>({});
+  const codeCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { leftPanelWidth, isDesktop, isHydrated } = useResizableLayout();
 
@@ -255,6 +523,78 @@ const ControlPanel: React.FC = () => {
     }) ?? jsx;
   const shouldShowCopyButton =
     config?.showCopyButton !== false && Boolean(copyText);
+  const baseSnippet = copyText || jsx;
+  const formattedCode = useMemo(
+    () => formatJsxCodeSnippet(baseSnippet),
+    [baseSnippet]
+  );
+  const hasCodeSnippet = Boolean(config?.showCodeSnippet && formattedCode);
+  const highlightedCode = useMemo<React.ReactNode[] | null>(
+    () => (formattedCode ? highlightJsx(formattedCode) : null),
+    [formattedCode]
+  );
+
+  useEffect(() => {
+    if (!hasCodeSnippet) {
+      setIsCodeVisible(false);
+    }
+  }, [hasCodeSnippet]);
+
+  useEffect(() => {
+    setCodeCopied(false);
+    if (codeCopyTimeoutRef.current) {
+      clearTimeout(codeCopyTimeoutRef.current);
+      codeCopyTimeoutRef.current = null;
+    }
+  }, [formattedCode]);
+
+  useEffect(() => {
+    return () => {
+      if (codeCopyTimeoutRef.current) {
+        clearTimeout(codeCopyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleToggleCodeVisibility = useCallback(() => {
+    setIsCodeVisible((prev) => {
+      const next = !prev;
+      if (!next) {
+        setCodeCopied(false);
+        if (codeCopyTimeoutRef.current) {
+          clearTimeout(codeCopyTimeoutRef.current);
+          codeCopyTimeoutRef.current = null;
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const handleCodeCopy = useCallback(() => {
+    if (!formattedCode) return;
+    if (
+      typeof navigator === "undefined" ||
+      !navigator.clipboard ||
+      typeof navigator.clipboard.writeText !== "function"
+    ) {
+      return;
+    }
+    navigator.clipboard
+      .writeText(formattedCode)
+      .then(() => {
+        setCodeCopied(true);
+        if (codeCopyTimeoutRef.current) {
+          clearTimeout(codeCopyTimeoutRef.current);
+        }
+        codeCopyTimeoutRef.current = setTimeout(() => {
+          setCodeCopied(false);
+          codeCopyTimeoutRef.current = null;
+        }, 3000);
+      })
+      .catch(() => {
+        // noop
+      });
+  }, [formattedCode]);
 
   // Format raw schema keys into human-friendly labels
   const labelize = (key: string) =>
@@ -526,12 +866,56 @@ const ControlPanel: React.FC = () => {
             renderControl(key, control, "root")
           )}
           {bottomFolderSections}
+          {hasCodeSnippet && (
+            <div className="border border-stone-700/60 rounded-lg bg-stone-900/70">
+              <button
+                type="button"
+                onClick={handleToggleCodeVisibility}
+                className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-stone-200 tracking-wide"
+                aria-expanded={isCodeVisible}
+              >
+                <span>{isCodeVisible ? "Hide Code" : "Show Code"}</span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isCodeVisible ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {isCodeVisible && (
+                <div className="relative border-t border-stone-700/60 bg-stone-950/60 px-4 py-4 rounded-b-lg">
+                  <button
+                    type="button"
+                    onClick={handleCodeCopy}
+                    className="absolute top-3 right-3 flex items-center gap-1 rounded-md border border-stone-700 bg-stone-800 px-2 py-1 text-xs font-medium text-white shadow hover:bg-stone-700"
+                  >
+                    {codeCopied ? (
+                      <>
+                        <Check className="h-3.5 w-3.5" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                  <pre className="whitespace-pre overflow-x-auto text-xs md:text-sm text-stone-200 pr-14">
+                    <code className="block text-stone-200">
+                      {highlightedCode ?? formattedCode}
+                    </code>
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
           {shouldShowCopyButton && (
             <div key="control-panel-jsx" className="flex-1 pt-4">
               <button
                 onClick={() => {
-                  if (!copyText) return;
-                  navigator.clipboard.writeText(copyText);
+                  const copyPayload = formattedCode || baseSnippet;
+                  if (!copyPayload) return;
+                  navigator.clipboard.writeText(copyPayload);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 5000);
                 }}

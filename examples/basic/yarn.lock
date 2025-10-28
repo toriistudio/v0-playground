@@ -473,7 +473,7 @@
   integrity sha512-n6BE/eA2MoGTeASIAJE3SSI2PGysk3FNcVYCpl+aK9ByR/I3bzvBd0vOV/4r4bdsBhYXiABPoM1EcjZvibqNAA==
 
 "@toriistudio/v0-playground@file:.yalc/@toriistudio/v0-playground":
-  version "0.5.5"
+  version "0.6.0"
 
 "@types/babel__core@^7.20.5":
   version "7.20.5"

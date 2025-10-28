@@ -75,6 +75,7 @@ type ControlsConfig = {
   mainLabel?: string;
   showGrid?: boolean;
   showPresentationButton?: boolean;
+  showCodeSnippet?: boolean;
   addAdvancedPaletteControl?: ResolvedAdvancedPaletteConfig;
 };
 
@@ -123,6 +124,7 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
   const [values, setValues] = useState<Record<string, any>>({});
   const [config, setConfig] = useState<ControlsConfig>({
     showCopyButton: true,
+    showCodeSnippet: false,
   });
   const [componentName, setComponentName] = useState<string | undefined>();
   const [channelName, setChannelName] = useState<string | null>(null);
