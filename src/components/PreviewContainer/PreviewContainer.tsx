@@ -17,7 +17,7 @@ const PreviewContainer: React.FC<Props> = ({ children, hideControls }) => {
   return (
     <div
       ref={previewRef}
-      className="order-1 md:order-2 flex-1 bg-black overflow-auto flex items-center justify-center relative"
+      className="order-1 md:order-2 flex-1 md:flex-none bg-black overflow-auto flex items-center justify-center relative"
       style={
         isHydrated && isDesktop && !hideControls
           ? {
@@ -27,9 +27,9 @@ const PreviewContainer: React.FC<Props> = ({ children, hideControls }) => {
           : {}
       }
     >
-      <div className="w-screen h-screen">
+      <div className="w-full h-screen">
         {config?.showGrid && <Grid />}
-        <div className="w-screen h-screen flex items-center justify-center relative">
+        <div className="w-full h-full flex items-center justify-center relative">
           {children}
         </div>
       </div>
