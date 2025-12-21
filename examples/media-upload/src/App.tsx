@@ -1,37 +1,13 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import {
   Playground,
   useControls,
-  type PresetMediaEntry,
   type UploadedMedia,
 } from "@toriistudio/v0-playground";
 
 const DEFAULT_IMAGE = "/v0.png";
-
-const PRESET_MEDIA: PresetMediaEntry[] = [
-  {
-    src: DEFAULT_IMAGE,
-    label: "Default",
-    type: "image",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=240&auto=format&fit=crop",
-    label: "Mountains",
-    type: "image",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=240&auto=format&fit=crop",
-    label: "Beach",
-    type: "image",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=240&auto=format&fit=crop",
-    label: "City",
-    type: "image",
-  },
-];
 
 function ImagePreview() {
   const selectMediaRef = useRef<(media: UploadedMedia) => void>(
@@ -56,8 +32,7 @@ function ImagePreview() {
         addMediaUploadControl: {
           folder: "Media",
           folderPlacement: "top",
-          presetMedia: PRESET_MEDIA,
-          maxPresetCount: PRESET_MEDIA.length,
+
           onSelectMedia: (media) => selectMediaRef.current(media),
           onClear: () => clearMediaRef.current(),
         },

@@ -16,23 +16,23 @@ import type { PresetMediaEntry, UploadedMedia } from "@/types/media";
 
 const DEFAULT_PRESET_MEDIA: PresetMediaEntry[] = [
   {
-    src: "https://res.cloudinary.com/dz8kk1l4r/image/upload/v1763233793/astronaut_q84mbj.png",
-    label: "Astronaut",
+    src: "/v0.png",
+    label: "Default",
     type: "image",
   },
   {
-    src: "https://res.cloudinary.com/dz8kk1l4r/image/upload/v1763233793/surreal-head_r0ozcd.png",
-    label: "Futuristic",
+    src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=240&auto=format&fit=crop",
+    label: "Mountains",
     type: "image",
   },
   {
-    src: "https://res.cloudinary.com/dz8kk1l4r/image/upload/v1763233797/futuristic_bpwdzt.png",
-    label: "Surreal",
+    src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=240&auto=format&fit=crop",
+    label: "Beach",
     type: "image",
   },
   {
-    src: "https://res.cloudinary.com/dz8kk1l4r/image/upload/v1763233793/portrait_hd7dyc.png",
-    label: "Portrait",
+    src: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=240&auto=format&fit=crop",
+    label: "City",
     type: "image",
   },
 ];
