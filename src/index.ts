@@ -8,7 +8,13 @@ export {
 } from "@/context/ControlsContext";
 
 // Type exports
-export type { ControlsSchema, ControlType } from "@/context/ControlsContext";
+export type {
+  ControlType,
+  ControlsSchema,
+  CopyButtonFnArgs,
+  MediaUploadControlConfig,
+} from "@/context/ControlsContext";
+export type { PresetMediaEntry, UploadedMedia } from "@/types/media";
 export {
   computePaletteGradient,
   clonePalette,

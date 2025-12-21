@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import {
   Check,
   Copy,
@@ -32,6 +38,7 @@ import {
   PRESENTATION_PARAM,
 } from "@/constants/urlParams";
 import AdvancedPaletteControl from "@/components/AdvancedPaletteControl";
+import MediaUploadControl from "@/components/MediaUploadControl";
 
 const splitPropsString = (input: string) => {
   const props: string[] = [];
@@ -355,10 +362,7 @@ const ControlPanel: React.FC = () => {
       const viewportHeight = window.innerHeight || 900;
       const controlsWidth = Math.max(
         320,
-        Math.min(
-          600,
-          Math.round((viewportWidth * leftPanelWidth) / 100)
-        )
+        Math.min(600, Math.round((viewportWidth * leftPanelWidth) / 100))
       );
       const controlsHeight = Math.max(600, viewportHeight);
       const controlsFeatures = [
@@ -389,6 +393,10 @@ const ControlPanel: React.FC = () => {
   }, [componentName, values]);
 
   type ControlEntry = [string, (typeof schema)[string]];
+  type ButtonControlEntry = [
+    string,
+    Extract<ControlEntry[1], { type: "button" }>
+  ];
 
   const visibleEntries = Object.entries(schema).filter(
     ([, control]) => !control.hidden
@@ -458,12 +466,54 @@ const ControlPanel: React.FC = () => {
     }
   }
 
-  const rootButtonControls = rootControls.filter(
-    ([, control]) => control.type === "button"
-  );
-  const rootNormalControls = rootControls.filter(
-    ([, control]) => control.type !== "button"
-  );
+  const mediaUploadConfig = config?.addMediaUploadControl;
+  let mediaUploadControlNode: React.ReactNode = null;
+
+  if (mediaUploadConfig) {
+    const mediaUploadNode = (
+      <MediaUploadControl
+        key="mediaUploadControl"
+        onSelectMedia={(media) => {
+          mediaUploadConfig.onSelectMedia?.(media);
+        }}
+        onClear={() => {
+          mediaUploadConfig.onClear?.();
+        }}
+        presetMedia={mediaUploadConfig.presetMedia}
+        maxPresetCount={mediaUploadConfig.maxPresetCount}
+      />
+    );
+    const mediaFolder = mediaUploadConfig.folder?.trim();
+    if (mediaFolder) {
+      const placement = mediaUploadConfig.folderPlacement ?? "bottom";
+      ensureFolder(mediaFolder);
+      if (!folderControls.has(mediaFolder)) {
+        folderControls.set(mediaFolder, []);
+      }
+      const existingPlacement = folderPlacement.get(mediaFolder);
+      if (!existingPlacement || placement === "top") {
+        folderPlacement.set(mediaFolder, placement);
+      }
+      if (!folderExtras.has(mediaFolder)) {
+        folderExtras.set(mediaFolder, []);
+      }
+      folderExtras.get(mediaFolder)!.push(mediaUploadNode);
+    } else {
+      mediaUploadControlNode = mediaUploadNode;
+    }
+  }
+
+  const rootButtonControls: ButtonControlEntry[] = [];
+  const rootNormalControls: ControlEntry[] = [];
+
+  rootControls.forEach((entry) => {
+    const [key, control] = entry;
+    if (control.type === "button") {
+      rootButtonControls.push([key, control]);
+    } else {
+      rootNormalControls.push(entry);
+    }
+  });
 
   const folderGroups = folderOrder
     .map((folder) => ({
@@ -862,6 +912,7 @@ const ControlPanel: React.FC = () => {
             </div>
           )}
           {advancedPaletteControlNode}
+          {mediaUploadControlNode}
           {rootNormalControls.map(([key, control]) =>
             renderControl(key, control, "root")
           )}

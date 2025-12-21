@@ -26,6 +26,10 @@ import {
   type PaletteChannelKey,
   type ResolvedAdvancedPaletteConfig,
 } from "@/lib/advancedPalette";
+import type {
+  PresetMediaEntry,
+  UploadedMedia,
+} from "@/types/media";
 
 type BaseControl = {
   hidden?: boolean;
@@ -58,7 +62,7 @@ export type ControlType =
 
 export type ControlsSchema = Record<string, ControlType>;
 
-type CopyButtonFnArgs = {
+export type CopyButtonFnArgs = {
   componentName?: string;
   values: Record<string, any>;
   schema: ControlsSchema;
@@ -69,6 +73,15 @@ type CopyButtonFnArgs = {
   }) => string;
 };
 
+export type MediaUploadControlConfig = {
+  folder?: string;
+  folderPlacement?: "top" | "bottom";
+  presetMedia?: PresetMediaEntry[];
+  maxPresetCount?: number;
+  onSelectMedia?: (media: UploadedMedia) => void;
+  onClear?: () => void;
+};
+
 type ControlsConfig = {
   showCopyButton?: boolean;
   showCopyButtonFn?: (args: CopyButtonFnArgs) => string | null | undefined;
@@ -77,6 +90,7 @@ type ControlsConfig = {
   showPresentationButton?: boolean;
   showCodeSnippet?: boolean;
   addAdvancedPaletteControl?: ResolvedAdvancedPaletteConfig;
+  addMediaUploadControl?: MediaUploadControlConfig;
 };
 
 type UseControlsConfig = Omit<ControlsConfig, "addAdvancedPaletteControl"> & {
@@ -155,22 +169,42 @@ export const ControlsProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (opts?.config) {
-      const { addAdvancedPaletteControl, ...otherConfig } = opts.config;
+      const {
+        addAdvancedPaletteControl,
+        addMediaUploadControl,
+        ...otherConfig
+      } = opts.config;
 
-      setConfig((prev) => ({
-        ...prev,
-        ...otherConfig,
-        ...(Object.prototype.hasOwnProperty.call(
-          opts.config,
-          "addAdvancedPaletteControl"
-        )
-          ? {
-              addAdvancedPaletteControl: addAdvancedPaletteControl
-                ? resolveAdvancedPaletteConfig(addAdvancedPaletteControl)
-                : undefined,
-            }
-          : {}),
-      }));
+      setConfig((prev) => {
+        const nextConfig: ControlsConfig = {
+          ...prev,
+          ...otherConfig,
+        };
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            opts.config,
+            "addAdvancedPaletteControl"
+          )
+        ) {
+          nextConfig.addAdvancedPaletteControl = addAdvancedPaletteControl
+            ? resolveAdvancedPaletteConfig(addAdvancedPaletteControl)
+            : undefined;
+        }
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            opts.config,
+            "addMediaUploadControl"
+          )
+        ) {
+          nextConfig.addMediaUploadControl = addMediaUploadControl
+            ? { ...addMediaUploadControl }
+            : undefined;
+        }
+
+        return nextConfig;
+      });
     }
 
     setSchema((prevSchema) => ({ ...prevSchema, ...newSchema }));
