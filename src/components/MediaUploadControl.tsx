@@ -16,7 +16,7 @@ import type { PresetMediaEntry, UploadedMedia } from "@/types/media";
 
 const DEFAULT_PRESET_MEDIA: PresetMediaEntry[] = [
   {
-    src: "/v0.png",
+    src: "https://res.cloudinary.com/dz8kk1l4r/image/upload/v1766331792/v0_b4wr7j.png",
     label: "Default",
     type: "image",
   },
