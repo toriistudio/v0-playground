@@ -19,11 +19,13 @@ const PreviewContainer: React.FC<Props> = ({ children, hideControls }) => {
       ref={previewRef}
       className="order-1 md:order-2 flex-1 md:flex-none bg-black overflow-auto flex items-center justify-center relative"
       style={
-        isHydrated && isDesktop && !hideControls
-          ? {
-              width: `${100 - leftPanelWidth}%`,
-              marginLeft: `${leftPanelWidth}%`,
-            }
+        isHydrated && isDesktop
+          ? hideControls
+            ? { width: "100%" }
+            : {
+                width: `${100 - leftPanelWidth}%`,
+                marginLeft: `${leftPanelWidth}%`,
+              }
           : {}
       }
     >
