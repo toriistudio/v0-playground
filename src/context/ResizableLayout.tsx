@@ -117,7 +117,7 @@ export const ResizableLayout = ({
 
           {isHydrated && isDesktop && !hideControls && (
             <div
-              className="order-3 w-2 bg-stone-800 hover:bg-stone-700 cursor-col-resize items-center justify-center z-10 transition-opacity duration-300"
+              className="order-3 w-2 bg-stone-800 hover:bg-stone-700 cursor-col-resize items-center justify-center z-max transition-opacity duration-300"
               onMouseDown={() => setIsDragging(true)}
               style={{
                 position: "absolute",
