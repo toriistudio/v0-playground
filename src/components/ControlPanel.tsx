@@ -924,6 +924,7 @@ const ControlPanel: React.FC = () => {
                 onClick={handleToggleCodeVisibility}
                 className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-stone-200 tracking-wide"
                 aria-expanded={isCodeVisible}
+                data-testid="show-code-toggle"
               >
                 <span>{isCodeVisible ? "Hide Code" : "Show Code"}</span>
                 <ChevronDown
@@ -938,6 +939,7 @@ const ControlPanel: React.FC = () => {
                     type="button"
                     onClick={handleCodeCopy}
                     className="absolute top-3 right-3 flex items-center gap-1 rounded-md border border-stone-700 bg-stone-800 px-2 py-1 text-xs font-medium text-white shadow hover:bg-stone-700"
+                    data-testid="copy-button"
                   >
                     {codeCopied ? (
                       <>
@@ -951,7 +953,7 @@ const ControlPanel: React.FC = () => {
                       </>
                     )}
                   </button>
-                  <pre className="whitespace-pre overflow-x-auto text-xs md:text-sm text-stone-200 pr-14">
+                  <pre className="whitespace-pre overflow-x-auto text-xs md:text-sm text-stone-200 pr-14" data-testid="code-snippet">
                     <code className="block text-stone-200">
                       {highlightedCode ?? formattedCode}
                     </code>
