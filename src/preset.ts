@@ -59,6 +59,9 @@ const preset: Partial<Config> = {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      zIndex: {
+        max: "9999",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
